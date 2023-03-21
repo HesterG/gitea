@@ -421,6 +421,11 @@ function assignMenuAttributes(menu) {
 }
 
 export async function handleReply($el) {
+  console.log('handleReply', $el);
+  const $comment = $el.closest('.comment-code-cloud');
+  console.log($comment);
+  console.dir($comment);
+  const commentID = $comment.attr('id');
   hideElem($el);
   const form = $el.closest('.comment-code-cloud').find('.comment-form');
   form.removeClass('gt-hidden');
@@ -428,7 +433,7 @@ export async function handleReply($el) {
   let easyMDE = getAttachedEasyMDE($textarea);
   if (!easyMDE) {
     await attachTribute($textarea.get(), {mentions: true, emoji: true});
-    easyMDE = await createCommentEasyMDE($textarea);
+    easyMDE = await createCommentEasyMDE($textarea, commentID);
   }
   $textarea.focus();
   easyMDE.codemirror.focus();
@@ -495,14 +500,21 @@ export function initRepoPullRequestReview() {
     await handleReply($(this));
   });
 
+  $(document).on('click', 'button.btn-reply', async function (e) {
+    const $comment = $(this).closest('.comment-code-cloud');
+    console.dir($comment)
+    window.localStorage.removeItem(`easymde-input-${$comment.attr('id')}`);
+  });
+
   const $reviewBox = $('.review-box-panel');
   if ($reviewBox.length === 1) {
     (async () => {
+      console.log('review box')
       // the editor's height is too large in some cases, and the panel cannot be scrolled with page now because there is `.repository .diff-detail-box.sticky { position: sticky; }`
       // the temporary solution is to make the editor's height smaller (about 4 lines). GitHub also only show 4 lines for default. We can improve the UI (including Dropzone area) in future
       // EasyMDE's options can not handle minHeight & maxHeight together correctly, we have to set max-height for .CodeMirror-scroll in CSS.
       const $reviewTextarea = $reviewBox.find('textarea');
-      const easyMDE = await createCommentEasyMDE($reviewTextarea, {minHeight: '80px'});
+      const easyMDE = await createCommentEasyMDE($reviewTextarea, window.location.pathname, {minHeight: '80px'});
       initEasyMDEImagePaste(easyMDE, $reviewBox.find('.dropzone'));
     })();
   }
@@ -570,6 +582,7 @@ export function initRepoPullRequestReview() {
     const td = ntr.find(`.add-comment-${side}`);
     let commentCloud = td.find('.comment-code-cloud');
     if (commentCloud.length === 0 && !ntr.find('button[name="pending_review"]').length) {
+      console.log('pending_review')
       const data = await $.get($(this).closest('[data-new-comment-url]').data('new-comment-url'));
       td.html(data);
       commentCloud = td.find('.comment-code-cloud');

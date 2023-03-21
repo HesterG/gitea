@@ -91,7 +91,8 @@ export function initRepoCommentForm() {
       if (textarea.closest('#edit-content-form')) {
         continue;
       }
-      const easyMDE = await createCommentEasyMDE(textarea, {
+      console.log('heree')
+      const easyMDE = await createCommentEasyMDE(textarea, window.location.pathname, {
         'onChange': () => {
           const value = easyMDE?.value().trim();
           $statusButton.text($statusButton.attr(value.length === 0 ? 'data-status' : 'data-status-and-comment'));
@@ -402,6 +403,7 @@ async function onEditContent(event) {
     $tabMenu.find('.preview.item').attr('data-tab', $editContentZone.data('preview'));
     $editContentForm.find('.write').attr('data-tab', $editContentZone.data('write'));
     $editContentForm.find('.preview').attr('data-tab', $editContentZone.data('preview'));
+    console.log('editing')
     easyMDE = await createCommentEasyMDE($textarea);
 
     initCompMarkupContentPreviewTab($editContentForm);

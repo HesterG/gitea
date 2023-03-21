@@ -18,7 +18,7 @@ export async function importEasyMDE() {
  * @param easyMDEOptions the options for EasyMDE
  * @returns {null|EasyMDE}
  */
-export async function createCommentEasyMDE(textarea, easyMDEOptions = {}) {
+export async function createCommentEasyMDE(textarea, uid = 0, easyMDEOptions = {}) {
   if (textarea instanceof $) {
     textarea = textarea[0];
   }
@@ -40,6 +40,7 @@ export async function createCommentEasyMDE(textarea, easyMDEOptions = {}) {
     spellChecker: false,
     inputStyle: 'contenteditable', // nativeSpellcheck requires contenteditable
     nativeSpellcheck: true,
+    initialValue: window.localStorage.getItem(`easymde-input-${uid}`) || '',
     toolbar: ['bold', 'italic', 'strikethrough', '|',
       'heading-1', 'heading-2', 'heading-3', 'heading-bigger', 'heading-smaller', '|',
       'code', 'quote', '|', {
@@ -79,6 +80,10 @@ export async function createCommentEasyMDE(textarea, easyMDEOptions = {}) {
 
   easyMDE.codemirror.on('change', (...args) => {
     easyMDEOptions?.onChange?.(...args);
+    if (uid != 0) {
+      console.log('changing');
+      window.localStorage.setItem(`easymde-input-${uid}`, easyMDE.value());
+    }
   });
   easyMDE.codemirror.setOption('extraKeys', {
     'Cmd-Enter': codeMirrorQuickSubmit,
@@ -110,6 +115,7 @@ export async function createCommentEasyMDE(textarea, easyMDEOptions = {}) {
   });
   await attachTribute(inputField, {mentions: true, emoji: true});
   attachEasyMDEToElements(easyMDE);
+  console.log('uuid', uid)
   return easyMDE;
 }
 
