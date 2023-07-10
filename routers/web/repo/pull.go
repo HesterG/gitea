@@ -722,7 +722,8 @@ func ViewPullCommits(ctx *context.Context) {
 	commits := git_model.ConvertFromGitCommit(ctx, prInfo.Commits, ctx.Repo.Repository)
 	ctx.Data["Commits"] = commits
 	ctx.Data["CommitCount"] = len(commits)
-
+	// For commits page
+	PrepareBranchList(ctx)
 	getBranchData(ctx, issue)
 	ctx.HTML(http.StatusOK, tplPullCommits)
 }
@@ -888,18 +889,7 @@ func ViewPullFiles(ctx *context.Context) {
 
 	ctx.Data["IsAttachmentEnabled"] = setting.Attachment.Enabled
 	// For files changed page
-	brs, err := git_model.FindBranchNames(ctx, git_model.FindBranchOptions{
-		RepoID: ctx.Repo.Repository.ID,
-		ListOptions: db.ListOptions{
-			ListAll: true,
-		},
-		IsDeletedBranch: util.OptionalBoolFalse,
-	})
-	if err != nil {
-		ctx.ServerError("GetBranches", err)
-		return
-	}
-	ctx.Data["Branches"] = brs
+	PrepareBranchList(ctx)
 	upload.AddUploadContext(ctx, "comment")
 
 	ctx.HTML(http.StatusOK, tplPullFiles)
